@@ -17,6 +17,13 @@
 
 package config
 
+import (
+	"fmt"
+	"os/exec"
+	"strconv"
+	"strings"
+)
+
 // https://source.android.com/devices/architecture/vndk/linker-namespace
 var (
 	default_so_paths = []string{
@@ -30,4 +37,29 @@ const ElfArchIsandroid = true
 
 func GetDynLibDirs() []string {
 	return default_so_paths
+}
+
+func GetAndroidUidByName(pkgname string) uint64 {
+	cmd := exec.Command("dumpsys", "package", pkgname, "|", "grep", "userId")
+	result, err := cmd.CombinedOutput()
+	if err != nil {
+		fmt.Println("GetAndroidUidByName error ", err)
+		return 0
+	}
+	// userId=10253
+
+	for _, s := range strings.Split(string(result), "\n") {
+		var tmp = strings.Trim(s, " ")
+		if strings.Contains(tmp, "userId=") {
+			id := strings.Split(tmp, "userId=")[1]
+			nid, err := strconv.Atoi(id)
+			if err != nil {
+				return 0
+			}
+			// 这里我们就找到了
+			return uint64(nid)
+		}
+
+	}
+	return 0
 }

@@ -244,7 +244,7 @@ func (ce *ConnDataEvent) String() string {
 
 func (ce *ConnDataEvent) Clone() IEventStruct {
 	event := new(ConnDataEvent)
-	event.eventType = EventTypeModuleData
+	event.eventType = EventTypeEventProcessor //EventTypeModuleData
 	return event
 }
 
