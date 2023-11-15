@@ -88,6 +88,11 @@ func openSSLCommandFunc(command *cobra.Command, args []string) {
 	modNames := []string{}
 	if config.ElfArchIsandroid || oc.Write != "" {
 		modNames = []string{module.ModuleNameOpenssl}
+		// 我们检查如果指定了name参数，同时判断一下 uid是否为空，如果为空，就读去对应的uid的值
+		if gConf.Uid == 0 && gConf.Name != "" {
+			gConf.Uid = config.GetAndroidUidByName(gConf.Name)
+		}
+
 	} else {
 		modNames = []string{module.ModuleNameOpenssl, module.ModuleNameGnutls, module.ModuleNameNspr}
 	}
