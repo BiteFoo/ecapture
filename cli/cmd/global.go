@@ -15,11 +15,12 @@
 package cmd
 
 import (
-	"github.com/spf13/cobra"
 	"io"
 	"net"
 	"os"
 	"strings"
+
+	"github.com/spf13/cobra"
 )
 
 const (
@@ -40,6 +41,7 @@ type GlobalFlags struct {
 	addrType   uint8  // 0:stdout, 1:file, 2:tcp
 	address    string
 	writer     io.Writer
+	Name       string // for android use pkgname
 }
 
 func getGlobalConf(command *cobra.Command) (conf GlobalFlags, err error) {
@@ -93,5 +95,6 @@ func getGlobalConf(command *cobra.Command) (conf GlobalFlags, err error) {
 			conf.writer = f
 		}
 	}
+	conf.Name, err = command.Flags().GetString("name")
 	return
 }

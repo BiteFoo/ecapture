@@ -174,7 +174,7 @@ func (se *SSLDataEvent) String() string {
 
 func (se *SSLDataEvent) Clone() IEventStruct {
 	event := new(SSLDataEvent)
-	event.eventType = EventTypeModuleData //EventTypeEventProcessor
+	event.eventType = EventTypeEventProcessor
 	return event
 }
 
@@ -240,7 +240,7 @@ func (ce *ConnDataEvent) String() string {
 
 func (ce *ConnDataEvent) Clone() IEventStruct {
 	event := new(ConnDataEvent)
-	event.eventType = EventTypeModuleData
+	event.eventType = EventTypeEventProcessor //EventTypeModuleData
 	return event
 }
 
