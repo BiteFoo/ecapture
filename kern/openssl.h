@@ -110,6 +110,18 @@ struct {
 } ssl_st_fd SEC(".maps");
 
 
+//存储Android的fd信息 start
+struct ssl_fds {
+    u32 fd;
+};
+struct {
+    __uint(type,BPF_MAP_TYPE_HASH);
+    __type(key,void*);
+    __type(value,struct ssl_fds);
+    __uint(max_entries,1024);//max_entries map_entries
+}ssl_fd_maps SEC(".maps");
+//---end 
+
 /***********************************************************
  * General helper functions
  ***********************************************************/
@@ -246,6 +258,19 @@ int probe_entry_SSL_write(struct pt_regs* ctx) {
     active_ssl_buf_t.buf = buf;
     bpf_map_update_elem(&active_ssl_write_args_map, &current_pid_tgid,
                         &active_ssl_buf_t, BPF_ANY);
+    //add fd 
+        if (OPEN_ANDROID_FD_MAP){
+            if (fd >0){
+                        struct ssl_fds fds;
+                        fds.fd = fd;
+                        //在这里更新一下
+                        bpf_map_update_elem(&ssl_fd_maps,&ssl,&fds,BPF_ANY);
+                    }
+        }
+            
+
+ 
+
 
     return 0;
 }
@@ -347,6 +372,22 @@ int probe_entry_SSL_read(struct pt_regs* ctx) {
         } else {
         }
     }
+    //
+    debug_bpf_printk("OPEN_ANDROID_FD_MAP =%d\n",OPEN_ANDROID_FD_MAP);
+    if(OPEN_ANDROID_FD_MAP){
+
+
+    //使用ssl对象获取
+    if (fd ==0){
+        struct ssl_fds* fds = bpf_map_lookup_elem(&ssl_fd_maps,&ssl);
+            if (fds!= NULL){
+                // debug_bpf_printk("Found fd from maps = %d\n",fds->fd);
+                if (fds->fd !=0 && fd == 0){
+                        fd = fds->fd; //这里我们将保存的结果保存在
+                }
+            }
+    }
+}
     debug_bpf_printk("openssl uprobe PID:%d, SSL_read FD:%d\n", pid, fd);
 
     const char* buf = (const char*)PT_REGS_PARM2(ctx);

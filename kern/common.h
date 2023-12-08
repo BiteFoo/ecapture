@@ -15,6 +15,13 @@
 #ifndef ECAPTURE_COMMON_H
 #define ECAPTURE_COMMON_H
 
+//需要指定Android可用
+#ifdef ANDROID_FD_MAP
+#define OPEN_ANDROID_FD_MAP 1
+#else
+#define OPEN_ANDROID_FD_MAP 0
+#endif 
+
 #ifdef DEBUG_PRINT
 #define debug_bpf_printk(fmt, ...)                     \
     do {                                               \

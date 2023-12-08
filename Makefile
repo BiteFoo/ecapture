@@ -50,12 +50,15 @@ DEBUG_PRINT := -DDEBUG_PRINT
 endif
 
 TARGET_TAG ?= linux
+ANDROID_FD_MAP ?=
 ifeq ($(ANDROID),1)
 TARGET_TAG := androidgki
+ANDROID_FD_MAP :=-DANDROID_FD_MAP
 endif
 
 EXTRA_CFLAGS ?= -O2 -mcpu=v1 \
 	$(DEBUG_PRINT)	\
+	$(ANDROID_FD_MAP) \
 	-nostdinc \
 	-Wno-pointer-sign
 
@@ -66,6 +69,7 @@ EXTRA_CFLAGS_NOCORE ?= -emit-llvm -O2 -S\
 	-DNOCORE \
 	-DKBUILD_MODNAME=\"eCapture\" \
 	$(DEBUG_PRINT) \
+	$(ANDROID_FD_MAP) \
 	-Wall \
 	-Wno-unused-variable \
 	-Wnounused-but-set-variable \
