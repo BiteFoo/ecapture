@@ -18,6 +18,7 @@ import (
 	"bufio"
 	"bytes"
 	"compress/gzip"
+	"ecapture/storage"
 	"fmt"
 	"io"
 	"log"
@@ -37,13 +38,16 @@ type HTTPResponse struct {
 	isInit       bool
 	reader       *bytes.Buffer
 	bufReader    *bufio.Reader
+	UUID string 
 }
+var preProcessor storage.PreProcessor
 
 func (hr *HTTPResponse) Init() {
 	hr.reader = bytes.NewBuffer(nil)
 	hr.bufReader = bufio.NewReader(hr.reader)
 	hr.receivedLen = 0
 	hr.headerLength = 0
+	preProcessor = storage.NewPreProcessor()
 }
 
 func (hr *HTTPResponse) Name() string {
@@ -155,6 +159,13 @@ func (hr *HTTPResponse) Display() []byte {
 		log.Println("[http response] DumpResponse error:", e)
 		return hr.reader.Bytes()
 	}
+	//在这里进行操作数据
+	var data storage.PreProcessorData
+	data.Length = uint64(hr.headerLength)
+	data.Resp  = hr.response
+
+	// preProcessor.Write()
+
 	return b
 }
 
