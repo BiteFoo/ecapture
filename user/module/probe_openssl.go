@@ -24,9 +24,6 @@ import (
 	"ecapture/user/event"
 	"errors"
 	"fmt"
-	"github.com/cilium/ebpf"
-	manager "github.com/gojue/ebpfmanager"
-	"golang.org/x/sys/unix"
 	"log"
 	"math"
 	"os"
@@ -34,6 +31,10 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/cilium/ebpf"
+	manager "github.com/gojue/ebpfmanager"
+	"golang.org/x/sys/unix"
 )
 
 const (
@@ -356,27 +357,27 @@ func (m *MOpenSSLProbe) setupManagersUprobe() error {
 			},
 
 			// ------------------- SSL_set_fd hook-------------------------------------
-			{
-				Section:          "uprobe/SSL_set_fd",
-				EbpfFuncName:     "probe_SSL_set_fd",
-				AttachToFuncName: "SSL_set_fd",
-				BinaryPath:       binaryPath,
-				UID:              "uprobe_ssl_set_fd",
-			},
-			{
-				Section:          "uprobe/SSL_set_rfd",
-				EbpfFuncName:     "probe_SSL_set_fd",
-				AttachToFuncName: "SSL_set_rfd",
-				BinaryPath:       binaryPath,
-				UID:              "uprobe_ssl_set_rfd",
-			},
-			{
-				Section:          "uprobe/SSL_set_wfd",
-				EbpfFuncName:     "probe_SSL_set_fd",
-				AttachToFuncName: "SSL_set_wfd",
-				BinaryPath:       binaryPath,
-				UID:              "uprobe_ssl_set_wfd",
-			},
+			// {
+			// 	Section:          "uprobe/SSL_set_fd",
+			// 	EbpfFuncName:     "probe_SSL_set_fd",
+			// 	AttachToFuncName: "SSL_set_fd",
+			// 	BinaryPath:       binaryPath,
+			// 	UID:              "uprobe_ssl_set_fd",
+			// },
+			// {
+			// 	Section:          "uprobe/SSL_set_rfd",
+			// 	EbpfFuncName:     "probe_SSL_set_fd",
+			// 	AttachToFuncName: "SSL_set_rfd",
+			// 	BinaryPath:       binaryPath,
+			// 	UID:              "uprobe_ssl_set_rfd",
+			// },
+			// {
+			// 	Section:          "uprobe/SSL_set_wfd",
+			// 	EbpfFuncName:     "probe_SSL_set_fd",
+			// 	AttachToFuncName: "SSL_set_wfd",
+			// 	BinaryPath:       binaryPath,
+			// 	UID:              "uprobe_ssl_set_wfd",
+			// },
 		},
 
 		Maps: []*manager.Map{

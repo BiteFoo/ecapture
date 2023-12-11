@@ -17,6 +17,7 @@ package event_processor
 import (
 	"bufio"
 	"bytes"
+	"ecapture/storage"
 	"log"
 	"net/http"
 	"net/http/httputil"
@@ -29,12 +30,17 @@ type HTTPRequest struct {
 	isInit     bool
 	reader     *bytes.Buffer
 	bufReader  *bufio.Reader
+	receivedLen  int64
+	UUID string
 }
+
 
 func (hr *HTTPRequest) Init() {
 	hr.reader = bytes.NewBuffer(nil)
 	hr.bufReader = bufio.NewReader(hr.reader)
+
 }
+
 
 func (hr *HTTPRequest) Name() string {
 	return "HTTPRequest"
@@ -73,6 +79,7 @@ func (hr *HTTPRequest) Write(b []byte) (int, error) {
 	if false {
 		hr.isDone = true
 	}
+	hr.receivedLen += int64(l)
 
 	return l, nil
 }
@@ -98,6 +105,7 @@ func (hr *HTTPRequest) Reset() {
 	hr.isInit = false
 	hr.reader.Reset()
 	hr.bufReader.Reset(hr.reader)
+	hr.receivedLen = 0
 }
 
 func (hr *HTTPRequest) Display() []byte {
@@ -109,7 +117,19 @@ func (hr *HTTPRequest) Display() []byte {
 		log.Println("DumpRequest error:", e)
 		return hr.reader.Bytes()
 	}
+
+	//
+	var data  storage.PreProcessorData
+	data.Length = uint64(hr.request.ContentLength)
+	data.Req = hr.request
+	data.Type = storage.ReqType
+	data.UUID  = hr.UUID
+	storage.Write(data)
+
 	return b
+}
+func (hr *HTTPRequest)SetUUID(uuid string){
+	hr.UUID = uuid
 }
 
 func init() {

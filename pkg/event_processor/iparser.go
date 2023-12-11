@@ -57,6 +57,7 @@ type IParser interface {
 	Init()
 	Display() []byte
 	Reset()
+	SetUUID(uuid string)
 }
 
 var parsers = make(map[string]IParser)
@@ -117,6 +118,7 @@ func NewParser(payload []byte) IParser {
 type DefaultParser struct {
 	reader *bytes.Buffer
 	isdone bool
+	UUID string 
 }
 
 func (this *DefaultParser) ParserType() ParserType {
@@ -160,7 +162,12 @@ func (this *DefaultParser) Display() []byte {
 	return []byte(CToGoString(this.reader.Bytes()))
 }
 
+func (df *DefaultParser)SetUUID(uuid string){
+	df.UUID = uuid
+}
+
 func (this *DefaultParser) Reset() {
 	this.isdone = false
 	this.reader.Reset()
+	this.UUID = ""
 }

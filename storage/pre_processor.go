@@ -1,8 +1,12 @@
 package storage
 
 import (
+	"encoding/json"
+	"fmt"
+	"io"
 	"log"
 	"net/http"
+	"strings"
 )
 
 type PreType int64 
@@ -26,34 +30,80 @@ type PreProcessorData struct {
 //
 type HttpsPreProcessor struct {
  
-    Q chan PreProcessorData //数据队列
+    
 }
+var q  chan PreProcessorData //数据队列
 
 func init(){
-    log.Println("call preprocessor")
+    q  = make(chan PreProcessorData)
+    go run()
 }
-//
-func NewPreProcessor()PreProcessor{
-    proceser := &HttpsPreProcessor{
 
-        Q: make(chan PreProcessorData),
+func dumpToJson(obj interface{}){
+    v ,err := json.MarshalIndent(obj,""," ")
+    if err != nil{
+        log.Println("Dump object to json error ",err)
+        return 
     }
-    return proceser
-
+    log.Printf("%v\n",string(v))
 }
+
 //
-func (hr *HttpsPreProcessor)Run(){
+func run(){
     //在这里进行处理封装的数据
-    for data := range hr.Q{
-        log.Printf("->dataType =  %v\n",data.Type)
+    for data := range q {
+        // log.Printf("->dataType =  %v\n",data.Type)
+        if data.Type == ReqType{
+            var req Request
+            req.Headers = make(map[string]string)
+            for k,v := range data.Req.Header{
+                req.Headers[k] = strings.Join(v,"")
+            }
+            body ,err := io.ReadAll(data.Req.Body)
+            if err != nil{
+                log.Println("Reading request body error: ",err)
+                continue
+            }
+            req.Body = string(body)
+            req.Method = data.Req.Method
+            req.Host = data.Req.Host
+            req.Protocol = data.Req.Proto
+            req.Path = data.Req.URL.Path
+            req.RequestSize = data.Length
+            req.UUID = data.UUID 
+            // log.Printf("%v\n",req)
+            dumpToJson(req)
+
+        }else if data.Type == RespTye{
+            var resp  Response
+            
+            body ,err := io.ReadAll(data.Resp.Body)
+            if err!= nil{
+                log.Println("read responsed eror ",err)
+                continue
+            }
+            resp.Body  = string(body)
+            resp.StatusCode = fmt.Sprintf("%v",data.Resp.StatusCode)
+            resp.Headers =  make(map[string]string)
+            for k,v := range data.Resp.Header{
+                resp.Headers[k] = strings.Join(v,"")
+            }
+            resp.UUID = data.UUID
+            resp.ResponseSize = data.Length
+            // log.Printf("%v\n",resp)
+            dumpToJson(resp)
+
+
+            
+        }
         
     }
 }
 
 
-func (hr *HttpsPreProcessor)Write(pre PreProcessorData)(error){
+func Write(pre PreProcessorData)(error){
 
-    hr.Q <- pre
+    q <- pre
 
     return nil
 }

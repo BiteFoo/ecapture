@@ -18,6 +18,7 @@ import (
 	"bytes"
 	"ecapture/user/event"
 	"encoding/hex"
+	"log"
 	"time"
 )
 
@@ -86,6 +87,7 @@ func (ew *eventWorker) Display() {
 	b := ew.parserEvents()
 	defer ew.parser.Reset()
 	if len(b) <= 0 {
+		log.Println(">Not found data ?? ")
 		return
 	}
 
@@ -93,10 +95,11 @@ func (ew *eventWorker) Display() {
 		b = []byte(hex.Dump(b))
 	}
 
+
 	// TODO 格式化的终端输出
 	// 重置状态
-	ew.processor.GetLogger().Printf("UUID:%s, Name:%s, Type:%d, Length:%d", ew.UUID, ew.parser.Name(), ew.parser.ParserType(), len(b))
-	ew.processor.GetLogger().Println("\n" + string(b))
+	// ew.processor.GetLogger().Printf("UUID:%s, Name:%s, Type:%d, Length:%d", ew.UUID, ew.parser.Name(), ew.parser.ParserType(), len(b))
+	// ew.processor.GetLogger().Println("\n" + string(b))
 	//ew.parser.Reset()
 	// 设定状态、重置包类型
 	ew.status = ProcessStateInit
@@ -121,6 +124,8 @@ func (ew *eventWorker) parserEvents() []byte {
 		ew.processor.GetLogger().Printf("ew.parser write payload %d bytes, error:%v", n, e)
 	}
 	ew.status = ProcessStateDone
+	ew.parser.SetUUID(ew.GetUUID())
+
 	return ew.parser.Display()
 }
 

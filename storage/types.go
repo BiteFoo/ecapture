@@ -9,7 +9,7 @@ type Request struct {
     Method string 
     Path string 
     Headers map[string]string
-    ReuestSize uint64 
+    RequestSize uint64 
     Body string  //请求body base64 
     ReqId string  //请求id
     UUID string //匹配到ecapture的uuid功能
@@ -22,6 +22,7 @@ type Response struct {
     StatusCode string 
     Body string // base64 
     UUID  string //匹配到ecapture的响应数据uuid
+    ResponseSize uint64
 
 }
 //http server数据

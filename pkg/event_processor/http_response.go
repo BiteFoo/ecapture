@@ -40,14 +40,19 @@ type HTTPResponse struct {
 	bufReader    *bufio.Reader
 	UUID string 
 }
-var preProcessor storage.PreProcessor
+
 
 func (hr *HTTPResponse) Init() {
 	hr.reader = bytes.NewBuffer(nil)
 	hr.bufReader = bufio.NewReader(hr.reader)
 	hr.receivedLen = 0
 	hr.headerLength = 0
-	preProcessor = storage.NewPreProcessor()
+	
+}
+
+func (hr* HTTPResponse)SetUUID(uuid string){
+
+	hr.UUID = uuid
 }
 
 func (hr *HTTPResponse) Name() string {
@@ -88,6 +93,7 @@ func (hr *HTTPResponse) Write(b []byte) (int, error) {
 		}
 	}
 	hr.receivedLen += int64(l)
+	log.Println("-> response recived bytes ",hr.receivedLen)
 
 	// 检测是否接收完整个包
 	//if hr.response.ContentLength >= hr.receivedLen {
@@ -118,6 +124,7 @@ func (hr *HTTPResponse) Reset() {
 	hr.isInit = false
 	hr.reader.Reset()
 	hr.bufReader.Reset(hr.reader)
+	hr.UUID = ""
 }
 
 func (hr *HTTPResponse) Display() []byte {
@@ -159,12 +166,14 @@ func (hr *HTTPResponse) Display() []byte {
 		log.Println("[http response] DumpResponse error:", e)
 		return hr.reader.Bytes()
 	}
-	//在这里进行操作数据
+	//
+	//在这里进行操作数据写会存储
 	var data storage.PreProcessorData
-	data.Length = uint64(hr.headerLength)
+	data.Length = uint64(hr.receivedLen)
 	data.Resp  = hr.response
-
-	// preProcessor.Write()
+	data.Type = storage.RespTye
+	data.UUID = hr.UUID
+	storage.Write(data)
 
 	return b
 }

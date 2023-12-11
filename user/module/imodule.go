@@ -22,12 +22,13 @@ import (
 	"ecapture/user/event"
 	"errors"
 	"fmt"
-	"github.com/cilium/ebpf"
-	"github.com/cilium/ebpf/perf"
-	"github.com/cilium/ebpf/ringbuf"
 	"log"
 	"os"
 	"strings"
+
+	"github.com/cilium/ebpf"
+	"github.com/cilium/ebpf/perf"
+	"github.com/cilium/ebpf/ringbuf"
 )
 
 type IModule interface {
@@ -299,9 +300,11 @@ func (m *Module) Dispatcher(e event.IEventStruct) {
 		}
 	case event.EventTypeEventProcessor:
 		m.processor.Write(e)
+		// m.logger.Println("EventTypeEventProcessor sent")
 	case event.EventTypeModuleData:
 		// Save to cache
 		m.child.Dispatcher(e)
+		// m.logger.Println("EventTypeModuleData sent")
 	default:
 		m.logger.Printf("%s\tunknown event type:%d", m.child.Name(), e.EventType())
 	}
